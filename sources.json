@@ -1,0 +1,8 @@
+[
+  { "name": "BBC World", "rss_url": "https://feeds.bbci.co.uk/news/world/rss.xml", "category": "news" },
+  { "name": "Reuters", "rss_url": "https://feeds.reuters.com/reuters/topNews", "category": "news" },
+  { "name": "Al Jazeera", "rss_url": "https://www.aljazeera.com/xml/rss/all.xml", "category": "news" },
+  { "name": "Ars Technica", "rss_url": "https://feeds.arstechnica.com/arstechnica/index", "category": "tech" },
+  { "name": "NASA", "rss_url": "https://www.nasa.gov/rss/dyn/breaking_news.rss", "category": "science" },
+  { "name": "The Guardian World", "rss_url": "https://www.theguardian.com/world/rss", "category": "news" }
+]
