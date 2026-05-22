@@ -16,7 +16,7 @@ def classify(title, summary):
         messages = [
             {
                 "role": "user",
-                "content": f"Classify this article.\nTitle: {title}\nSummary: {summary}\n\nReturn JSON only: {{\"domain\": \"politics|science|tech|economy|crime|history|other\", \"importance_score\": 0.0-1.0}}"
+                "content": f"Classify this article.\nTitle: {title}\nSummary: {summary}\n\nReturn JSON only: {{\"domain\": \"politics|science|tech|economy|crime|history|other\", \"importance_score\": 0.0-1.0, \"location\": \"City, Country or null if not location-specific\", \"lat\": 0.0, \"lng\": 0.0}}"
             }
         ]
     )
@@ -36,8 +36,8 @@ def classify_pending():
     for article in articles:
         result = classify(article["title"], article["summary"])
         cur.execute(
-            "UPDATE articles SET domain=?, importance_score=? WHERE id=?",
-            (result["domain"], result["importance_score"], article["id"])
+            "UPDATE articles SET domain=?, importance_score=?, location=?, lat=?, lng=? WHERE id=?",
+            (result["domain"], result["importance_score"], result.get("location"), result.get("lat"), result.get("lng"), article["id"])
         )
 
     conn.commit()

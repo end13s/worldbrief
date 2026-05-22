@@ -1,0 +1,21 @@
+# Environment
+.env
+
+# Database
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+
+# uv
+.python-version
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store

@@ -39,7 +39,10 @@ def init_db():
             published_at     TEXT,
             scraped_at       TEXT NOT NULL DEFAULT (datetime('now')),
             importance_score REAL,
-            sent_to_obsidian INTEGER NOT NULL DEFAULT 0
+            sent_to_obsidian INTEGER NOT NULL DEFAULT 0,
+            location         TEXT,
+            lat              REAL,
+            lng              REAL
         );
 
         CREATE INDEX IF NOT EXISTS idx_articles_domain      ON articles(domain);

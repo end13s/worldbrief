@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NewsPulse</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vis-timeline@7.7.2/dist/vis-timeline-graph2d.min.css" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <header>
+    <h1>NewsPulse</h1>
+    <div id="stats">
+      <span id="stat-total"></span>
+      <span id="stat-today"></span>
+    </div>
+    <input id="search" type="text" placeholder="Search articles..." />
+  </header>
+
+  <div id="filters">
+    <select id="filter-domain">
+      <option value="">All domains</option>
+      <option value="politics">Politics</option>
+      <option value="tech">Tech</option>
+      <option value="science">Science</option>
+      <option value="economy">Economy</option>
+      <option value="crime">Crime</option>
+      <option value="history">History</option>
+      <option value="other">Other</option>
+    </select>
+    <select id="filter-source"></select>
+    <select id="filter-time">
+      <option value="day">Today</option>
+      <option value="week">This week</option>
+      <option value="month">This month</option>
+      <option value="all" selected>All time</option>
+    </select>
+  </div>
+
+  <div id="map"></div>
+
+  <div id="timeline-container">
+    <div id="timeline"></div>
+  </div>
+
+  <div id="articles-list"></div>
+
+  <!-- Article popup -->
+  <div id="modal" class="hidden">
+    <div id="modal-content">
+      <button id="modal-close">✕</button>
+      <div id="modal-domain-badge"></div>
+      <h2 id="modal-title"></h2>
+      <p id="modal-meta"></p>
+      <p id="modal-summary"></p>
+      <div id="modal-actions">
+        <a id="modal-link" href="#" target="_blank">Read original article →</a>
+        <button id="modal-mark">★ Mark Important</button>
+      </div>
+    </div>
+  </div>
+  <div id="modal-overlay" class="hidden"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vis-timeline@7.7.2/dist/vis-timeline-graph2d.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
