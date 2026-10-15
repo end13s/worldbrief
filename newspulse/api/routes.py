@@ -1,16 +1,16 @@
-from fastapi import APIRouter
+from contextlib import closing
+
+from fastapi import APIRouter, HTTPException, Query
+
 from newspulse.db import get_conn
 
 router = APIRouter()
 
 
 @router.get("/articles")
-def get_articles(domain: str = None, source_id: int = None, limit: int = 50):
-    conn = get_conn()
-    cur = conn.cursor()
-
+def get_articles(domain: str | None = None, source_id: int | None = None, limit: int = Query(50, ge=1, le=1000)):
     query = "SELECT * FROM articles WHERE 1=1"
-    params = []
+    params: list = []
 
     if domain:
         query += " AND domain=?"
@@ -22,33 +22,29 @@ def get_articles(domain: str = None, source_id: int = None, limit: int = 50):
     query += " ORDER BY published_at DESC LIMIT ?"
     params.append(limit)
 
-    articles = cur.execute(query, params).fetchall()
-    return [dict(a) for a in articles]
+    with closing(get_conn()) as conn:
+        return [dict(a) for a in conn.execute(query, params).fetchall()]
 
 
 @router.get("/articles/{article_id}")
 def get_article(article_id: int):
-    conn = get_conn()
-    cur = conn.cursor()
-
-    article = cur.execute("SELECT * FROM articles WHERE id=?", (article_id,)).fetchone()
+    with closing(get_conn()) as conn:
+        article = conn.execute("SELECT * FROM articles WHERE id=?", (article_id,)).fetchone()
+    if article is None:
+        raise HTTPException(status_code=404, detail="Article not found")
     return dict(article)
 
 
 @router.get("/sources")
 def get_sources():
-    conn = get_conn()
-    cur = conn.cursor()
-
-    sources = cur.execute("SELECT * FROM sources WHERE active=1").fetchall()
-    return [dict(s) for s in sources]
+    with closing(get_conn()) as conn:
+        return [dict(s) for s in conn.execute("SELECT * FROM sources WHERE active=1").fetchall()]
 
 
 @router.post("/articles/{article_id}/mark-important")
 def mark_important(article_id: int):
-    conn = get_conn()
-    cur = conn.cursor()
-
-    cur.execute("UPDATE articles SET sent_to_obsidian=1 WHERE id=?", (article_id,))
-    conn.commit()
+    with closing(get_conn()) as conn, conn:
+        cur = conn.execute("UPDATE articles SET sent_to_obsidian=1 WHERE id=?", (article_id,))
+    if cur.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Article not found")
     return {"status": "ok"}
