@@ -234,6 +234,7 @@ header h1 {
 
 /* Leaflet dark tiles */
 .leaflet-container { background: #1a1a1a; }
+.leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) grayscale(0.4); }
 .leaflet-control-attribution {
   opacity: 0.3;
   font-size: 0.6rem;

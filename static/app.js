@@ -22,6 +22,17 @@ async function init() {
   updateStats();
 }
 
+// Feed titles, sources and locations come from third-party RSS; never insert them as HTML.
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
+  ));
+}
+
+function domainOf(article) {
+  return DOMAIN_COLORS[article.domain] ? article.domain : 'other';
+}
+
 // ── Data ─────────────────────────────────────────────────────────────────────
 
 async function loadSources() {
@@ -29,7 +40,7 @@ async function loadSources() {
   const sources = await res.json();
   const sel = document.getElementById('filter-source');
   sel.innerHTML = '<option value="">All sources</option>' +
-    sources.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    sources.map(s => `<option value="${Number(s.id)}">${escapeHtml(s.name)}</option>`).join('');
 }
 
 async function loadArticles() {
@@ -47,10 +58,13 @@ function initMap() {
     maxBoundsViscosity: 1.0,
   }).setView([20, 10], 2);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '© OpenStreetMap © CARTO',
+  // CARTO's dark basemap now requires an API key; OSM tiles are free with attribution
+  // and are darkened in style.css to match the dashboard.
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 18,
     noWrap: true,
+    bounds: [[-85.05, -180], [85.05, 180]],  // don't request tiles outside the world
   }).addTo(map);
 
   markersLayer = L.layerGroup().addTo(map);
@@ -71,7 +85,7 @@ function renderMapMarkers(articles) {
         fillOpacity: 0.7,
       });
       marker.on('click', () => openModal(a));
-      marker.bindTooltip(a.title, { direction: 'top', opacity: 0.9 });
+      marker.bindTooltip(escapeHtml(a.title), { direction: 'top', opacity: 0.9 });
       markersLayer.addLayer(marker);
     });
 }
@@ -106,7 +120,7 @@ function renderTimeline(articles) {
       id: a.id,
       content: '',
       start: new Date(a.published_at),
-      title: a.title,
+      title: escapeHtml(a.title),
       style: `background-color: ${DOMAIN_COLORS[a.domain] || DOMAIN_COLORS.other}; border-color: transparent; border-radius: 3px;`,
     }));
 
@@ -126,11 +140,11 @@ function renderArticles(articles) {
   list.innerHTML = articles.map(a => `
     <div class="article-card ${a.importance_score >= 0.8 ? 'important' : ''}" data-id="${a.id}">
       <div class="card-header">
-        <span class="domain-badge domain-${a.domain || 'other'}">${a.domain || 'other'}</span>
+        <span class="domain-badge domain-${domainOf(a)}">${domainOf(a)}</span>
         <span class="score">${a.importance_score ? (a.importance_score * 10).toFixed(1) + '/10' : ''}</span>
       </div>
-      <h3>${a.title || 'No title'}</h3>
-      <div class="card-meta">${a.location ? '📍 ' + a.location + ' · ' : ''}${formatDate(a.published_at)}</div>
+      <h3>${a.title ? escapeHtml(a.title) : 'No title'}</h3>
+      <div class="card-meta">${a.location ? '📍 ' + escapeHtml(a.location) + ' · ' : ''}${formatDate(a.published_at)}</div>
     </div>
   `).join('');
 
@@ -154,10 +168,9 @@ function openModal(article) {
   document.getElementById('modal-meta').textContent =
     [article.location, formatDate(article.published_at)].filter(Boolean).join(' · ');
 
-  const raw = article.summary || '';
-  const tmp = document.createElement('div');
-  tmp.innerHTML = raw;
-  document.getElementById('modal-summary').textContent = tmp.textContent || '';
+  // DOMParser builds an inert document, so markup in the feed summary never runs.
+  const summaryDoc = new DOMParser().parseFromString(article.summary || '', 'text/html');
+  document.getElementById('modal-summary').textContent = summaryDoc.body.textContent || '';
 
   document.getElementById('modal-link').href = article.url;
   document.getElementById('modal-mark').dataset.id = article.id;
