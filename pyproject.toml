@@ -1,15 +1,27 @@
 [project]
-name = "newspulse"
-version = "0.1.0"
+name = "worldbrief"
+version = "0.2.0"
+description = "Self-hosted news aggregator: RSS scraping, LLM classification and a map/timeline dashboard."
 requires-python = ">=3.11"
 dependencies = [
-    "anthropic>=0.103.1",
+    "anthropic>=1.14.0",
     "apscheduler>=3.11.2",
     "fastapi>=0.136.1",
     "feedparser>=6.0.12",
-    "httpx>=0.28.1",
-    "jinja2>=3.1.6",
+    "pydantic>=2.7",
     "python-dotenv>=1.2.2",
-    "python-multipart>=0.0.29",
     "uvicorn[standard]>=0.47.0",
 ]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["newspulse", "newspulse.api"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
